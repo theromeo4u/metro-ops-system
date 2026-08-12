@@ -26,7 +26,7 @@
 
 import express from "express";
 import Train from "../models/Train.js";
-import { authMiddleware, adminOnly } from "../middleware/auth.js";
+import { authMiddleware, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
