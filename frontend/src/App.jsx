@@ -4,6 +4,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Register from "./pages/Register.jsx";
 import Logs from "./pages/Logs";
+import UsersPage from "./pages/UsersPage";
+import AddAdmin from "./pages/AddAdmin";
 
 function App() {
   return (
@@ -19,6 +21,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/add-admin" element={<AddAdmin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/logs" element={<Logs />} />
       </Routes>

@@ -125,7 +125,10 @@ export default function Navbar() {
 
   return (
     <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 shadow">
-      <h1 className="text-xl font-bold text-black dark:text-white">
+      <h1
+        onClick={() => navigate("/dashboard")}
+        className="text-xl font-bold cursor-pointer hover:text-blue-500"
+      >
         🚆 Mumbai Metro Dashboard
       </h1>
 
