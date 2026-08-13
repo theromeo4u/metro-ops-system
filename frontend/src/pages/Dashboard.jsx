@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
-import TrainCard from "../components/TrainCard.jsx";
 import useSocket from "../hooks/useSocket";
 
 export default function Dashboard() {
@@ -10,11 +9,6 @@ export default function Dashboard() {
   const [status, setStatus] = useState("");
   const [location, setLocation] = useState("");
 
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  const socket = useSocket();
-
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     trainNumber: "",
@@ -22,18 +16,10 @@ export default function Dashboard() {
     location: "",
   });
 
-  const handleEdit = (train) => {
-    const newStatus = prompt("Enter new status:", train.status);
-    const newLocation = prompt("Enter new location:", train.location);
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-    if (newStatus && newLocation) {
-      handleUpdate(train._id, {
-        ...train,
-        status: newStatus,
-        location: newLocation,
-      });
-    }
-  };
+  const socket = useSocket();
 
   // ✅ Fetch trains
   const fetchTrains = async () => {
@@ -47,7 +33,7 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ Add train (ADMIN ONLY)
+  // ✅ Add train
   const addTrain = async () => {
     if (!trainNumber || !status || !location) {
       alert("Fill all fields");
@@ -157,7 +143,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ➕ Add Train (ONLY ADMIN) */}
+        {/* ➕ Add Train */}
         {role === "admin" && (
           <div className="bg-white p-4 rounded shadow mb-6">
             <h2 className="text-lg font-semibold mb-3">Add Train</h2>
@@ -170,12 +156,16 @@ export default function Dashboard() {
                 className="border p-2 rounded w-full"
               />
 
-              <input
+              <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                placeholder="Status"
                 className="border p-2 rounded w-full"
-              />
+              >
+                <option value="">Status</option>
+                <option>Running</option>
+                <option>Stopped</option>
+                <option>Failure</option>
+              </select>
 
               <input
                 value={location}
@@ -194,35 +184,25 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 🚆 Train List */}
-        <h2 className="text-lg font-semibold mb-3">Train List</h2>
-
+        {/* 🚆 Table */}
         <div className="overflow-x-auto bg-white shadow rounded-lg">
-          <table className="w-full text-left border-collapse">
-            {/* HEADER */}
+          <table className="w-full">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3">🚆 Train No</th>
+                <th className="p-3">🚆 Train</th>
                 <th className="p-3 text-center">📍 Station</th>
                 <th className="p-3 text-right">🚦 Status</th>
-
-                {role === "admin" && (
-                  <th className="p-3 text-right">⚙ Actions</th>
-                )}
+                {role === "admin" && <th className="p-3 text-right">⚙</th>}
               </tr>
             </thead>
 
-            {/* BODY */}
             <tbody>
               {trains.map((train) => {
                 const isEditing = editingId === train._id;
 
                 return (
-                  <tr
-                    key={train._id}
-                    className="border-t hover:bg-gray-50 transition"
-                  >
-                    {/* Train Number */}
+                  <tr key={train._id} className="border-t">
+                    {/* Train */}
                     <td className="p-3 font-semibold">
                       {isEditing ? (
                         <input
@@ -264,7 +244,10 @@ export default function Dashboard() {
                         <select
                           value={editData.status}
                           onChange={(e) =>
-                            setEditData({ ...editData, status: e.target.value })
+                            setEditData({
+                              ...editData,
+                              status: e.target.value,
+                            })
                           }
                           className="border p-1 rounded"
                         >
@@ -273,7 +256,7 @@ export default function Dashboard() {
                           <option>Failure</option>
                         </select>
                       ) : (
-                        <span className="inline-flex items-center gap-2 font-medium">
+                        <span className="inline-flex items-center gap-2">
                           <span
                             className={`w-3 h-3 rounded-full ${
                               train.status === "Running"
@@ -288,9 +271,9 @@ export default function Dashboard() {
                       )}
                     </td>
 
-                    {/* ACTIONS */}
+                    {/* Actions */}
                     {role === "admin" && (
-                      <td className="p-3 text-right space-x-2">
+                      <td className="p-3 text-right">
                         {isEditing ? (
                           <>
                             <button
@@ -298,7 +281,7 @@ export default function Dashboard() {
                                 handleUpdate(train._id, editData);
                                 setEditingId(null);
                               }}
-                              className="bg-green-500 text-white px-3 py-1 rounded"
+                              className="bg-green-500 text-white px-3 py-1 rounded mr-2"
                             >
                               Save
                             </button>
@@ -321,7 +304,7 @@ export default function Dashboard() {
                                   location: train.location,
                                 });
                               }}
-                              className="bg-yellow-400 px-3 py-1 rounded"
+                              className="bg-yellow-400 px-3 py-1 rounded mr-2"
                             >
                               Edit
                             </button>
