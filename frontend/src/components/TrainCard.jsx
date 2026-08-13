@@ -36,7 +36,7 @@ const TrainCard = ({ train, onDelete, onUpdate, userRole }) => {
         <span className="font-bold text-lg w-1/3">{train.trainNumber}</span>
 
         {/* 📍 Station */}
-        <span className="text-gray-600 flex items-center justify-center w-1/3">
+        <span className="text-orange-600 flex items-center justify-center w-1/3">
           📍 {train.location}
         </span>
 
