@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Register from "./pages/Register.jsx";
+import Logs from "./pages/Logs";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           }
         />
         <Route path="/register" element={<Register />} />
+        <Route path="/logs" element={<Logs />} />
       </Routes>
     </BrowserRouter>
   );

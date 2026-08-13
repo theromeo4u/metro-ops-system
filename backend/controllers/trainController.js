@@ -1,57 +1,80 @@
 import Train from "../models/Train.js";
+import TrainLog from "../models/TrainLog.js";
 
-// ✅ Get all trains
+
+// ✅ GET ALL TRAINS
 export const getTrains = async (req, res) => {
     try {
-        const trains = await Train.find();
+        const trains = await Train.find().sort({ createdAt: -1 });
         res.json(trains);
     } catch (err) {
-        res.status(500).json({ msg: "Error fetching trains" });
+        res.status(500).json({ message: err.message });
     }
 };
 
-// ✅ Add train
+
+// ✅ ADD TRAIN
 export const addTrain = async (req, res) => {
     try {
         const train = await Train.create(req.body);
 
-        const io = req.app.get("io");
-        if (io) io.emit("trainAdded", train);
+        // 📅 Log entry
+        await TrainLog.create({
+            trainId: train._id,
+            trainNumber: train.trainNumber,
+            status: train.status,
+            location: train.location,
+            action: "Added",
+        });
 
         res.json(train);
     } catch (err) {
-        res.status(500).json({ msg: "Error adding train" });
+        res.status(500).json({ message: err.message });
     }
 };
 
-// ✅ Update train
+
+// ✅ UPDATE TRAIN
 export const updateTrain = async (req, res) => {
     try {
-        const updated = await Train.findByIdAndUpdate(
+        const train = await Train.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true }
         );
 
-        const io = req.app.get("io");
-        if (io) io.emit("trainUpdated", updated);
+        // 📅 Log entry
+        await TrainLog.create({
+            trainId: train._id,
+            trainNumber: train.trainNumber,
+            status: train.status,
+            location: train.location,
+            action: "Updated",
+        });
 
-        res.json(updated);
+        res.json(train);
     } catch (err) {
-        res.status(500).json({ msg: "Error updating train" });
+        res.status(500).json({ message: err.message });
     }
 };
 
-// ✅ Delete train
+
+// ✅ DELETE TRAIN
 export const deleteTrain = async (req, res) => {
     try {
-        await Train.findByIdAndDelete(req.params.id);
+        const train = await Train.findByIdAndDelete(req.params.id);
 
-        const io = req.app.get("io");
-        if (io) io.emit("trainDeleted", req.params.id);
+        // 📅 Log entry
+        await TrainLog.create({
+            trainId: train._id,
+            trainNumber: train.trainNumber,
+            status: train.status,
+            location: train.location,
+            action: "Deleted",
+        });
 
-        res.json({ msg: "Deleted" });
+        res.json({ message: "Train deleted successfully" });
     } catch (err) {
-        res.status(500).json({ msg: "Error deleting train" });
+        res.status(500).json({ message: err.message });
     }
 };

@@ -3,7 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import logRoutes from "./routes/logRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import trainRoutes from "./routes/trainRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -24,6 +24,7 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/trains", trainRoutes);
+app.use("/api/logs", logRoutes);
 
 // MongoDB
 mongoose
