@@ -9,17 +9,17 @@ export default function Dashboard() {
   const [status, setStatus] = useState("");
   const [location, setLocation] = useState("");
 
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  const socket = useSocket();
-
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     trainNumber: "",
     status: "",
     location: "",
   });
+
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  const socket = useSocket();
 
   // ✅ Fetch trains
   const fetchTrains = async () => {
@@ -58,7 +58,7 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ Delete
+  // ✅ Delete train
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/api/trains/${id}`, {
@@ -68,10 +68,11 @@ export default function Dashboard() {
       setTrains((prev) => prev.filter((t) => t._id !== id));
     } catch (err) {
       console.error(err);
+      alert("Only admin can delete 🚫");
     }
   };
 
-  // ✅ Update
+  // ✅ Update train
   const handleUpdate = async (id, updatedData) => {
     try {
       const res = await axios.put(
@@ -83,6 +84,7 @@ export default function Dashboard() {
       setTrains((prev) => prev.map((t) => (t._id === id ? res.data : t)));
     } catch (err) {
       console.error(err);
+      alert("Only admin can update 🚫");
     }
   };
 
@@ -111,6 +113,7 @@ export default function Dashboard() {
     };
   }, [socket]);
 
+  // ✅ Load data
   useEffect(() => {
     fetchTrains();
   }, []);
@@ -121,50 +124,55 @@ export default function Dashboard() {
   const stopped = trains.filter((t) => t.status === "Stopped").length;
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-black dark:text-white">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
       <Navbar />
 
       <div className="max-w-5xl mx-auto p-4">
-        {/* 📊 Stats */}
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded text-center font-semibold">
             Total: {total}
           </div>
-
           <div className="bg-green-100 dark:bg-green-900 p-4 rounded text-center font-semibold">
             Running: {running}
           </div>
-
           <div className="bg-red-100 dark:bg-red-900 p-4 rounded text-center font-semibold">
             Stopped: {stopped}
           </div>
         </div>
 
-        {/* ➕ Add Train */}
+        {/* Add Train */}
         {role === "admin" && (
           <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
-            <h2 className="text-lg font-semibold mb-3">Add Train</h2>
+            <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+              Add Train
+            </h2>
 
             <div className="flex gap-2">
               <input
                 value={trainNumber}
                 onChange={(e) => setTrainNumber(e.target.value)}
                 placeholder="Train Number"
-                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
+                className="border p-2 rounded w-full"
               />
 
-              <input
+              {/* ✅ STATUS DROPDOWN */}
+              <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                placeholder="Status"
-                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
-              />
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Select Status</option>
+                <option value="Running">Running</option>
+                <option value="Stopped">Stopped</option>
+                <option value="Failure">Failure</option>
+              </select>
 
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location"
-                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
+                className="border p-2 rounded w-full"
               />
 
               <button
@@ -177,12 +185,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* 🚆 Table */}
+        {/* Train List */}
+        <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+          Train List
+        </h2>
+
         <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-200 dark:bg-gray-700">
+          <table className="w-full">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
-                <th className="p-3">🚆 Train</th>
+                <th className="p-3">🚆 Train No</th>
                 <th className="p-3 text-center">📍 Station</th>
                 <th className="p-3 text-right">🚦 Status</th>
                 {role === "admin" && (
@@ -196,11 +208,7 @@ export default function Dashboard() {
                 const isEditing = editingId === train._id;
 
                 return (
-                  <tr
-                    key={train._id}
-                    className="border-t dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    {/* Train */}
+                  <tr key={train._id} className="border-t">
                     <td className="p-3 font-semibold">
                       {isEditing ? (
                         <input
@@ -211,14 +219,13 @@ export default function Dashboard() {
                               trainNumber: e.target.value,
                             })
                           }
-                          className="border dark:border-gray-600 p-1 rounded w-full bg-transparent"
+                          className="border p-1 rounded w-full"
                         />
                       ) : (
                         train.trainNumber
                       )}
                     </td>
 
-                    {/* Station */}
                     <td className="p-3 text-center">
                       {isEditing ? (
                         <input
@@ -229,14 +236,13 @@ export default function Dashboard() {
                               location: e.target.value,
                             })
                           }
-                          className="border dark:border-gray-600 p-1 rounded bg-transparent"
+                          className="border p-1 rounded w-full"
                         />
                       ) : (
                         <>📍 {train.location}</>
                       )}
                     </td>
 
-                    {/* Status */}
                     <td className="p-3 text-right">
                       {isEditing ? (
                         <select
@@ -247,7 +253,7 @@ export default function Dashboard() {
                               status: e.target.value,
                             })
                           }
-                          className="border dark:border-gray-600 p-1 rounded bg-transparent"
+                          className="border p-1 rounded"
                         >
                           <option>Running</option>
                           <option>Stopped</option>
@@ -269,7 +275,6 @@ export default function Dashboard() {
                       )}
                     </td>
 
-                    {/* Actions */}
                     {role === "admin" && (
                       <td className="p-3 text-right space-x-2">
                         {isEditing ? (
@@ -286,7 +291,7 @@ export default function Dashboard() {
 
                             <button
                               onClick={() => setEditingId(null)}
-                              className="bg-gray-500 text-white px-3 py-1 rounded"
+                              className="bg-gray-400 text-white px-3 py-1 rounded"
                             >
                               Cancel
                             </button>
