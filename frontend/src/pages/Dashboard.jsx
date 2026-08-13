@@ -9,17 +9,17 @@ export default function Dashboard() {
   const [status, setStatus] = useState("");
   const [location, setLocation] = useState("");
 
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  const socket = useSocket();
+
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     trainNumber: "",
     status: "",
     location: "",
   });
-
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  const socket = useSocket();
 
   // ✅ Fetch trains
   const fetchTrains = async () => {
@@ -58,7 +58,7 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ Delete train
+  // ✅ Delete
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/api/trains/${id}`, {
@@ -68,11 +68,10 @@ export default function Dashboard() {
       setTrains((prev) => prev.filter((t) => t._id !== id));
     } catch (err) {
       console.error(err);
-      alert("Only admin can delete 🚫");
     }
   };
 
-  // ✅ Update train
+  // ✅ Update
   const handleUpdate = async (id, updatedData) => {
     try {
       const res = await axios.put(
@@ -84,7 +83,6 @@ export default function Dashboard() {
       setTrains((prev) => prev.map((t) => (t._id === id ? res.data : t)));
     } catch (err) {
       console.error(err);
-      alert("Only admin can update 🚫");
     }
   };
 
@@ -113,7 +111,6 @@ export default function Dashboard() {
     };
   }, [socket]);
 
-  // ✅ Initial load
   useEffect(() => {
     fetchTrains();
   }, []);
@@ -124,28 +121,28 @@ export default function Dashboard() {
   const stopped = trains.filter((t) => t.status === "Stopped").length;
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-black dark:text-white">
       <Navbar />
 
       <div className="max-w-5xl mx-auto p-4">
         {/* 📊 Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-100 p-4 rounded text-center font-semibold">
+          <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded text-center font-semibold">
             Total: {total}
           </div>
 
-          <div className="bg-green-100 p-4 rounded text-center font-semibold">
+          <div className="bg-green-100 dark:bg-green-900 p-4 rounded text-center font-semibold">
             Running: {running}
           </div>
 
-          <div className="bg-red-100 p-4 rounded text-center font-semibold">
+          <div className="bg-red-100 dark:bg-red-900 p-4 rounded text-center font-semibold">
             Stopped: {stopped}
           </div>
         </div>
 
         {/* ➕ Add Train */}
         {role === "admin" && (
-          <div className="bg-white p-4 rounded shadow mb-6">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6">
             <h2 className="text-lg font-semibold mb-3">Add Train</h2>
 
             <div className="flex gap-2">
@@ -153,25 +150,21 @@ export default function Dashboard() {
                 value={trainNumber}
                 onChange={(e) => setTrainNumber(e.target.value)}
                 placeholder="Train Number"
-                className="border p-2 rounded w-full"
+                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
               />
 
-              <select
+              <input
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="border p-2 rounded w-full"
-              >
-                <option value="">Status</option>
-                <option>Running</option>
-                <option>Stopped</option>
-                <option>Failure</option>
-              </select>
+                placeholder="Status"
+                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
+              />
 
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location"
-                className="border p-2 rounded w-full"
+                className="border dark:border-gray-600 bg-transparent p-2 rounded w-full"
               />
 
               <button
@@ -185,14 +178,16 @@ export default function Dashboard() {
         )}
 
         {/* 🚆 Table */}
-        <div className="overflow-x-auto bg-white shadow rounded-lg">
-          <table className="w-full">
-            <thead className="bg-gray-100">
+        <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-200 dark:bg-gray-700">
               <tr>
                 <th className="p-3">🚆 Train</th>
                 <th className="p-3 text-center">📍 Station</th>
                 <th className="p-3 text-right">🚦 Status</th>
-                {role === "admin" && <th className="p-3 text-right">⚙</th>}
+                {role === "admin" && (
+                  <th className="p-3 text-right">⚙ Actions</th>
+                )}
               </tr>
             </thead>
 
@@ -201,7 +196,10 @@ export default function Dashboard() {
                 const isEditing = editingId === train._id;
 
                 return (
-                  <tr key={train._id} className="border-t">
+                  <tr
+                    key={train._id}
+                    className="border-t dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     {/* Train */}
                     <td className="p-3 font-semibold">
                       {isEditing ? (
@@ -213,14 +211,14 @@ export default function Dashboard() {
                               trainNumber: e.target.value,
                             })
                           }
-                          className="border p-1 rounded w-full"
+                          className="border dark:border-gray-600 p-1 rounded w-full bg-transparent"
                         />
                       ) : (
                         train.trainNumber
                       )}
                     </td>
 
-                    {/* Location */}
+                    {/* Station */}
                     <td className="p-3 text-center">
                       {isEditing ? (
                         <input
@@ -231,7 +229,7 @@ export default function Dashboard() {
                               location: e.target.value,
                             })
                           }
-                          className="border p-1 rounded w-full"
+                          className="border dark:border-gray-600 p-1 rounded bg-transparent"
                         />
                       ) : (
                         <>📍 {train.location}</>
@@ -249,14 +247,14 @@ export default function Dashboard() {
                               status: e.target.value,
                             })
                           }
-                          className="border p-1 rounded"
+                          className="border dark:border-gray-600 p-1 rounded bg-transparent"
                         >
                           <option>Running</option>
                           <option>Stopped</option>
                           <option>Failure</option>
                         </select>
                       ) : (
-                        <span className="inline-flex items-center gap-2">
+                        <span className="inline-flex items-center gap-2 font-medium">
                           <span
                             className={`w-3 h-3 rounded-full ${
                               train.status === "Running"
@@ -273,7 +271,7 @@ export default function Dashboard() {
 
                     {/* Actions */}
                     {role === "admin" && (
-                      <td className="p-3 text-right">
+                      <td className="p-3 text-right space-x-2">
                         {isEditing ? (
                           <>
                             <button
@@ -281,14 +279,14 @@ export default function Dashboard() {
                                 handleUpdate(train._id, editData);
                                 setEditingId(null);
                               }}
-                              className="bg-green-500 text-white px-3 py-1 rounded mr-2"
+                              className="bg-green-500 text-white px-3 py-1 rounded"
                             >
                               Save
                             </button>
 
                             <button
                               onClick={() => setEditingId(null)}
-                              className="bg-gray-400 text-white px-3 py-1 rounded"
+                              className="bg-gray-500 text-white px-3 py-1 rounded"
                             >
                               Cancel
                             </button>
@@ -304,7 +302,7 @@ export default function Dashboard() {
                                   location: train.location,
                                 });
                               }}
-                              className="bg-yellow-400 px-3 py-1 rounded mr-2"
+                              className="bg-yellow-400 px-3 py-1 rounded"
                             >
                               Edit
                             </button>
