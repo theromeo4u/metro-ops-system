@@ -13,3 +13,5 @@ const trainLogSchema = new mongoose.Schema({
 });
 
 export default mongoose.model("TrainLog", trainLogSchema);
+
+console.log("Hey Romeo")
