@@ -144,3 +144,6 @@ const trainSchema = new mongoose.Schema({
 });
 
 export default mongoose.model("Train", trainSchema);
+
+
+console.log("Hey Romeo")
