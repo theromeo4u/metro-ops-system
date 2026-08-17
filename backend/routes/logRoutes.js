@@ -18,3 +18,5 @@ const router = express.Router();
 router.get("/", getLogs);
 
 export default router;
+
+console.log("Hey Romeo")
