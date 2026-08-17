@@ -8,3 +8,4 @@ export const getLogs = async (req, res) => {
         res.status(500).json({ msg: "Error fetching logs" });
     }
 };
+console.log("Hey Romeo")
