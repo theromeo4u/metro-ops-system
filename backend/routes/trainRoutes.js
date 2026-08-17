@@ -20,3 +20,4 @@ router.put("/:id", protect, adminOnly, updateTrain);
 router.delete("/:id", protect, adminOnly, deleteTrain);
 
 export default router;
+console.log("Hey Romeo")
