@@ -12,6 +12,7 @@ export const getTrains = async (req, res) => {
     }
 };
 
+console.log("Hey Romeo")
 
 // ✅ ADD TRAIN
 export const addTrain = async (req, res) => {
